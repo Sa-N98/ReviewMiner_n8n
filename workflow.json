@@ -1,0 +1,316 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        728
+      ],
+      "id": "1cbc2503-139a-4404-adb4-0467cc8825ee",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/san/Desktop/Flickpin/ReviewMiner_n8n\n. venv/bin/activate\necho 'virtual env created successfully' \npython3 scrape_gplay_store_reviews.py 'com.imdb.mobile' 'us'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        728
+      ],
+      "id": "fd15eb96-8957-41e2-8836-e36cfd002880",
+      "name": "Get Review Data"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/san/Desktop/Flickpin/ReviewMiner_n8n/us_reviews.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        728
+      ],
+      "id": "4c955cbc-6911-4ef4-919c-c487fb39c485",
+      "name": "Read Review Data"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        728
+      ],
+      "id": "22b2fd10-a541-441a-8261-a9d2cd5fd4d6",
+      "name": "Convert binary to json"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"Ratings\": {{ $('Convert binary to json').item.json.data.us[1] }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        344
+      ],
+      "id": "624569d4-360b-4042-9fae-7fe7de363ff3",
+      "name": "1 star"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"Ratings\": {{ $('Convert binary to json').item.json.data.us[2] }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        536
+      ],
+      "id": "0e7503bb-1259-48f8-9bc1-307d7298090e",
+      "name": "2 star"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"Ratings\": {{ $('Convert binary to json').item.json.data.us[3] }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        728
+      ],
+      "id": "49e793a1-c8b3-44ad-8342-45d63e403cdf",
+      "name": "3 star"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"Ratings\": {{ $('Convert binary to json').item.json.data.us[4] }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        920
+      ],
+      "id": "a74bca4b-9910-4785-b8c3-15833fbe4d41",
+      "name": "4 star"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"Ratings\": {{ $('Convert binary to json').item.json.data.us[5] }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        1112
+      ],
+      "id": "515a62ec-b2e0-4595-a418-a0c4b8ec9caf",
+      "name": "5 star"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Group the the following reviews \n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant specializing in analyzing user reviews and identifying whether they relate to UI/UX (user experience and interface) issues or non-UI/UX issues.\n\nYour task is to categorize each review into one of two categories:\n\nUI/UX Related: Reviews that mention anything about the user interface, design, layout, visual elements, navigation, usability, or overall user experience.\n\nExamples:\n\n\"Loading takes too long\"\n\n\"Navigating the app is confusing\"\n\n\"The interface looks outdated\"\n\n\"Love the color scheme\"\n\n\"Intuitive user flow\"\n\nNon-UI/UX Related: Reviews that mention issues unrelated to UI/UX, such as app crashes, connectivity problems, missing features, device compatibility, or availability restrictions.\n\nExamples:\n\n\"App crashes frequently\"\n\n\"Doesn't connect to the network\"\n\n\"Not available on my phone or in my country\"\n\nInstructions:\n\nFor each review, Apply the principles of design thinking to group them .\n\noutput should look like this :\n{\n\t\"UI/UX\": [\"Review 1\", \"Review 2\", \"Review 3\"],\n\t\"Non_UI/UX\": [\"Review 1\", \"Review 2\", \"Review 3\"]\n}\n\ndo not be verbose. output only json\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        728
+      ],
+      "id": "3dd26dbe-6331-48f5-879f-7747dbbd1ab9",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b:free",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        240,
+        944
+      ],
+      "id": "d1ddeb81-12cc-4036-9a75-eb826ee6d34d",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y5rxl6KPWIhSc8e7",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Review Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Review Data": {
+      "main": [
+        [
+          {
+            "node": "Read Review Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Review Data": {
+      "main": [
+        [
+          {
+            "node": "Convert binary to json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert binary to json": {
+      "main": [
+        [
+          {
+            "node": "1 star",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "2 star",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "3 star",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "5 star",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "4 star",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1 star": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2 star": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3 star": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4 star": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 star": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "05814892-90ed-4803-b0ac-9febed508ef7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1cc8f09347a0a68085b81c60ee375dda802442626dc60888378c7650c5fc5f6c"
+  },
+  "id": "Ulkrz0NeL1c9Bbqm",
+  "tags": []
+}
